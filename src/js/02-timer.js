@@ -32,7 +32,7 @@ const options = {
     refs.startBt.removeAttribute('disabled');
   },
 };
-const flatpickr = flatpickr(refs.inputEL, options);
+flatpickr(refs.inputEL, options);
 
 const timer = {
   intervalId: null,
