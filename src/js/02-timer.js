@@ -33,7 +33,7 @@ const options = {
   },
 };
 flatpickr(refs.inputEL, options);
-
+// Метод старта
 const timer = {
   intervalId: null,
   isActive: false,
