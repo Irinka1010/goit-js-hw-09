@@ -13,27 +13,28 @@ refs.startBt.addEventListener('click', () => {
   timer.start();
 });
 
-//По умолчанию кнопка не активна
-refs.startBt.setAttribute('disabled', true);
+refs.startBt.disabled = true;
 
-let selectedDate = Date.now();
+let selectedDate = null;
 
 const options = {
   enableTime: true,
   time_24hr: true,
   defaultDate: new Date(),
   minuteIncrement: 1,
-  onClose(selectedDates) {
-    selectedDate = selectedDates[0];
-    if (selectedDate < options.defaultDate) {
-      Notify.failure('Please choose a date in the future');
-      return;
-    }
-    refs.startBt.removeAttribute('disabled');
-  },
+  onClose,
 };
+function onClose(selectedDates) {
+  selectedDate = selectedDates[0];
+  if (selectedDate < options.defaultDate) {
+    Notify.failure('Please choose a date in the future');
+    return;
+  }
+  refs.startBt.disabled = false;
+}
+
 flatpickr(refs.inputEL, options);
-// Метод старта
+
 const timer = {
   intervalId: null,
   isActive: false,
@@ -44,11 +45,14 @@ const timer = {
 
     this.isActive = true;
     this.intervalId = setInterval(() => {
-      const currentTima = Date.now();
-      const ms = selectedDate - currentTima;
+      const currentTime = Date.now();
+      const ms = selectedDate - currentTime;
       if (ms <= 0) {
         clearInterval(this.intervalId);
-        refs.startBt.setAttribute('disabled', true);
+        refs.startBt.disabled = true;
+        this.isActive = false;
+        this.intervalId = null;
+
         return;
       }
       const time = convertMs(ms);
@@ -57,32 +61,29 @@ const timer = {
   },
 };
 
-// Отрисовует интерфейс
 function updateClockface({ days, hours, minutes, seconds }) {
   refs.days.textContent = days;
   refs.hours.textContent = hours;
   refs.minutes.textContent = minutes;
   refs.seconds.textContent = seconds;
 }
-// Принимает число, приводит к строчке и добавляет в начало 0 если число меньше 2-х
+
 function addLeadingZero(value) {
   return String(value).padStart(2, '0');
 }
-// Принимает время в милисикундах и переводит его в правельный формат
+
 function convertMs(ms) {
-  // Количество миллисекунд в единицу времени
   const second = 1000;
   const minute = second * 60;
   const hour = minute * 60;
   const day = hour * 24;
 
-  // Оставшиеся дни
   const days = addLeadingZero(Math.floor(ms / day));
-  // Оставшиеся  часы
+
   const hours = addLeadingZero(Math.floor((ms % day) / hour));
-  // Оставшиеся минуты
+
   const minutes = addLeadingZero(Math.floor(((ms % day) % hour) / minute));
-  // Оставшиеся  секунди
+
   const seconds = addLeadingZero(
     Math.floor((((ms % day) % hour) % minute) / second)
   );
